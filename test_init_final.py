@@ -2060,12 +2060,6 @@ while True:
 				fixedboss_information[0] = "```diff\n" + fixedboss_information[0] + "\n```"
 			else :
 				fixedboss_information[0] = '``` ```'
-	
-			embed = discord.Embed(
-					title = "----- 고 정 보 스 -----",
-					description= fixedboss_information[0],
-					color=0x0000ff
-					)
 			await ctx.send( embed=embed, tts=False)
 			for i in range(len(fixedboss_information)-1):
 				if len(fixedboss_information[i+1]) != 0:
