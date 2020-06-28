@@ -968,8 +968,8 @@ async def on_ready():
 	global chflg
 	
 	global endTime
-	global curr_guild_info
 	global setting_channel_name
+	global all_guilds
 			
 	print("Logged in as ") #화면에 봇의 아이디, 닉네임이 출력됩니다.
 	print(client.user.name)
@@ -995,37 +995,36 @@ async def on_ready():
 			channel_voice_id.append(str(channel_info[i].id))
 
 	await dbLoad()
-	
-	if basicSetting[6] != "" and basicSetting[7] != "" :
-		if str(basicSetting[6]) in channel_voice_id and str(basicSetting[7]) in channel_id:
-			for guild in all_guilds:
-				for text_channel in guild.text_channels:
-					if basicSetting[7] == text_channel.id:
-						curr_guild_info = guild
 
-			voice_client1 = await client.get_channel(basicSetting[6]).connect(reconnect=True)
-			channel = basicSetting[7]
+	if str(basicSetting[6]) in channel_voice_id and str(basicSetting[7]) in channel_id:
+		voice_client1 = await client.get_channel(basicSetting[6]).connect(reconnect=True)
+		channel = basicSetting[7]
 
-			print('< 텍스트채널 [' + client.get_channel(basicSetting[7]).name + '] 접속완료>')
-			print('< 음성채널 [' + client.get_channel(basicSetting[6]).name + '] 접속완료>')
-			if basicSetting[8] != "":
-				print('< 사다리채널 [' + client.get_channel(int(basicSetting[8])).name + '] 접속완료>')
-			if basicSetting[11] != "":
-				print('< 정산채널 [' + client.get_channel(int(basicSetting[11])).name + '] 접속완료>')
-			if basicSetting[18] != "":
-				print('< 척살채널 [' + client.get_channel(int(basicSetting[18])).name + '] 접속완료>')
-			if basicSetting[19] != "":
-				print('< 경주채널 [' + client.get_channel(int(basicSetting[19])).name + '] 접속완료>')
-			if int(basicSetting[13]) != 0 :
-				print('< 보탐봇 재시작 시간 ' + endTime.strftime('%Y-%m-%d ') + endTime.strftime('%H:%M:%S') + ' >')
-				print('< 보탐봇 재시작 주기 ' + basicSetting[13] + '일 >')
-			else :
-				print('< 보탐봇 재시작 설정안됨 >')
-			chflg = 1
-		else:
-			basicSetting[6] = ""
-			basicSetting[7] = ""
-			print(f"설정된 채널 값이 잘못 됐습니다. **[{command[0][0]}]** 명령어 먼저 입력하여 사용해주시기 바랍니다.")
+		setting_channel_name = client.get_channel(basicSetting[7]).name
+
+		now = datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[0]))
+
+		print('< 접속시간 [' + now.strftime('%Y-%m-%d ') + now.strftime('%H:%M:%S') + '] >')
+		print('< 텍스트채널 [' + client.get_channel(basicSetting[7]).name + '] 접속완료>')
+		print('< 음성채널 [' + client.get_channel(basicSetting[6]).name + '] 접속완료>')
+		if basicSetting[8] != "":
+			print('< 사다리채널 [' + client.get_channel(int(basicSetting[8])).name + '] 접속완료>')
+		if basicSetting[11] != "":
+			print('< 정산채널 [' + client.get_channel(int(basicSetting[11])).name + '] 접속완료>')
+		if basicSetting[18] != "":
+			print('< 척살채널 [' + client.get_channel(int(basicSetting[18])).name + '] 접속완료>')
+		if basicSetting[19] != "":
+			print('< 경주채널 [' + client.get_channel(int(basicSetting[19])).name + '] 접속완료>')
+		if int(basicSetting[13]) != 0 :
+			print('< 보탐봇 재시작 시간 ' + endTime.strftime('%Y-%m-%d ') + endTime.strftime('%H:%M:%S') + ' >')
+			print('< 보탐봇 재시작 주기 ' + basicSetting[13] + '일 >')
+		else :
+			print('< 보탐봇 재시작 설정안됨 >')
+		chflg = 1
+	else:
+		basicSetting[6] = ""
+		basicSetting[7] = ""
+		print(f"설정된 채널 값이 없거나 잘못 됐습니다. **[{command[0][0]}]** 명령어 먼저 입력하여 사용해주시기 바랍니다.")
 
 	# 디스코드에는 현재 본인이 어떤 게임을 플레이하는지 보여주는 기능이 있습니다.
 	# 이 기능을 사용하여 봇의 상태를 간단하게 출력해줄 수 있습니다.
@@ -1064,7 +1063,7 @@ while True:
 			contents = repo.get_contents("test_setting.ini")
 			repo.update_file(contents.path, "test_setting", result_textCH, contents.sha)
 
-			await ctx.send(f"< 텍스트채널 [{ctx.message.channel.name}] 접속완료 >\n< 음성채널 접속 후 [{command[6][0]}] 명령을 사용 하세요 >", tts=False)
+			await ctx.send(f"< 텍스트채널 [{ctx.message.channel.name}] 접속완료 >\n< 음성채널 접속 후 [{command[5][0]}] 명령을 사용 하세요 >", tts=False)
 			
 			print('< 텍스트채널 [' + client.get_channel(basicSetting[7]).name + '] 접속완료>')
 			if basicSetting[6] != "":
@@ -1086,6 +1085,11 @@ while True:
 
 			chflg = 1
 		else:
+			for guild in all_guilds:
+				for text_channel in guild.text_channels:
+					if basicSetting[7] == text_channel.id:
+						curr_guild_info = guild
+
 			emoji_list : list = ["⭕", "❌"]
 			guild_error_message = await ctx.send(f"이미 **[{curr_guild_info.name}]** 서버 **[{setting_channel_name}]** 채널이 명령어 채널로 설정되어 있습니다.\n해당 채널로 명령어 채널을 변경 하시려면 ⭕ 그대로 사용하시려면 ❌ 를 눌러주세요.\n(10초이내 미입력시 기존 설정 그대로 설정됩니다.)", tts=False)
 
@@ -1113,20 +1117,16 @@ while True:
 				
 				for i in range(len(inputData_textCH)):
 					if inputData_textCH[i].startswith("textchannel ="):
-						inputData_textCH[i] = 'textchannel = ' + str(channel) + '\r'
-						basicSetting[7] = channel
-						#print ('======', inputData_text[i])
+						inputData_textCH[i] = 'textchannel = ' + str(basicSetting[7]) + '\r'
 				
 				result_textCH = '\n'.join(inputData_textCH)
-				
-				#print (result_textCH)
 				
 				contents = repo.get_contents("test_setting.ini")
 				repo.update_file(contents.path, "test_setting", result_textCH, contents.sha)
 
-				return await ctx.send(f"명령어 채널이 **[{ctx.author.guild.name}]** 서버 **[{ctx.message.channel.name}]** 채널로 새로 설정되었습니다.\n< 음성채널 접속 후 [{command[6][0]}] 명령을 사용 하세요 >")
+				return await ctx.send(f"명령어 채널이 **[{ctx.author.guild.name}]** 서버 **[{ctx.message.channel.name}]** 채널로 새로 설정되었습니다.\n< 음성채널 접속 후 [{command[5][0]}] 명령을 사용 하세요 >")
 			else:
-				return await ctx.send(f"초기화가 취소되었습니다.\n**[{curr_guild_info.name}]** 서버 **[{setting_channel_name}]** 채널에서 사용해주세요!")
+				return await ctx.send(f"명령어 채널 설정이 취소되었습니다.\n**[{curr_guild_info.name}]** 서버 **[{setting_channel_name}]** 채널에서 사용해주세요!")
 
 	################ 보탐봇 메뉴 출력 ################ 	
 	@client.command(name=command[1][0], aliases=command[1][1:])
@@ -1161,7 +1161,7 @@ while True:
 			command_list += ','.join(command[21]) + ' [할말]\n'     #!상태
 			command_list += ','.join(command[28]) + ' 사다리, 정산, 척살, 경주\n\n'     #!채널설정
 			command_list += ','.join(command[22]) + '\n'     #보스탐
-			command_list += ','.join(command[22]) + '\n'     #!보스탐
+			command_list += ','.join(command[23]) + '\n'     #!보스탐
 			command_list += '[보스명]컷 또는 [보스명]컷 0000, 00:00\n'  
 			command_list += '[보스명] 컷 또는 [보스명] 컷 0000, 00:00\n'   
 			command_list += '[보스명]멍 또는 [보스명]멍 0000, 00:00\n'     
@@ -2655,7 +2655,7 @@ while True:
 
 					################ 보스 멍 처리 ################ 
 
-					if message.content.startswith(bossData[i][0] +'멍'):
+					if message.content.startswith(bossData[i][0] +'멍') or message.content.startswith(bossData[i][0] +' 멍'):
 						if hello.find('  ') != -1 :
 							bossData[i][6] = hello[hello.find('  ')+2:]
 							hello = hello[:hello.find('  ')]
@@ -2726,7 +2726,7 @@ while True:
 						
 				################ 예상 보스 타임 입력 ################ 
 
-					if message.content.startswith(bossData[i][0] +'예상'):
+					if message.content.startswith(bossData[i][0] +'예상')  or message.content.startswith(bossData[i][0] +' 예상'):
 						if hello.find('  ') != -1 :
 							bossData[i][6] = hello[hello.find('  ')+2:]
 							hello = hello[:hello.find('  ')]
@@ -2734,7 +2734,7 @@ while True:
 							bossData[i][6] = ''
 							
 						tmp_msg = bossData[i][0] +'예상'
-						if len(hello) > len(tmp_msg) + 3 :
+						if len(hello) > len(tmp_msg) + 4 :
 							if hello.find(':') != -1 :
 								chkpos = hello.find(':')
 								hours1 = hello[chkpos-2:chkpos]
@@ -2771,7 +2771,7 @@ while True:
 							
 					################ 보스타임 삭제 ################
 						
-					if message.content == bossData[i][0] +'삭제':
+					if message.content == bossData[i][0] +'삭제' or message.content == bossData[i][0] +' 삭제':
 						bossTime[i] = datetime.datetime.now()+datetime.timedelta(days=365, hours = int(basicSetting[0]))
 						tmp_bossTime[i] =  datetime.datetime.now()+datetime.timedelta(days=365, hours = int(basicSetting[0]))
 						bossTimeString[i] = '99:99:99'
